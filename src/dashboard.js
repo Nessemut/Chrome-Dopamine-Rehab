@@ -35,6 +35,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             customSiteSettings = items.customSiteSettings || {};
             renderSidebar();
+
+            if (customUrlsList.length > 0 && !selectedUrl) {
+                selectSite(customUrlsList[0]);
+            }
         });
     }
 
@@ -66,6 +70,18 @@ document.addEventListener('DOMContentLoaded', () => {
         noSelectionMsg.classList.add('d-none');
     }
 
+    function saveSettings() {
+        chrome.storage.sync.set({
+            customUrls: customUrlsList,
+            customSiteSettings: customSiteSettings
+        }, () => {
+            status.textContent = 'Settings saved!';
+            setTimeout(() => {
+                if (status) status.textContent = '';
+            }, 2000);
+        });
+    }
+
     addCustomUrlBtn.addEventListener('click', () => {
         const url = customUrlInput.value.trim();
         if (url && !customUrlsList.includes(url)) {
@@ -79,6 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
     siteActionSelect.addEventListener('change', () => {
         if (selectedUrl) {
             customSiteSettings[selectedUrl] = siteActionSelect.value;
+            saveSettings();
         }
     });
 
@@ -96,15 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     saveBtn.addEventListener('click', () => {
-        chrome.storage.sync.set({
-            customUrls: customUrlsList,
-            customSiteSettings: customSiteSettings
-        }, () => {
-            status.textContent = 'Settings saved!';
-            setTimeout(() => {
-                if (status) status.textContent = '';
-            }, 2000);
-        });
+        saveSettings();
     });
 
     loadSettings();
