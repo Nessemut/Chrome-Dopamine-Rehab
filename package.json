@@ -1,0 +1,14 @@
+{
+  "name": "dopamine-rehab-plugin",
+  "version": "1.0.0",
+  "description": "A Chrome extension to help manage time on addictive sites",
+  "main": "background.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/chrome": "^0.0.254"
+  }
+}
