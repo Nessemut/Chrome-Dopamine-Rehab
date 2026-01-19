@@ -67,3 +67,7 @@ body {
 #remove-site-btn:hover {
     opacity: 0.8;
 }
+
+#logo-title {
+    font-family: inter;
+}
