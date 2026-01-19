@@ -9,7 +9,7 @@
     "scripting"
   ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "dist/background.js"
   },
   "icons": {
     "16": "icons/icon16.png",
@@ -23,7 +23,7 @@
         "https://*/*"
       ],
       "js": [
-        "applySettings.js"
+        "dist/applySettings.js"
       ],
       "run_at": "document_start"
     }

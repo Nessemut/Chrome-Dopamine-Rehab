@@ -26,7 +26,7 @@ A Chrome extension to help manage time on addictive sites.
 - `manifest.json`: The extension's configuration file.
 - `src/`: Contains the source code for the dashboard.
 - `dashboard.html`: The HTML structure for the configuration dashboard.
-- `dashboard.js`: Logic for saving and loading settings using Chrome's storage API.
+- `dashboard.ts`: Logic for saving and loading settings using Chrome's storage API.
 
 ## Next Steps
 
