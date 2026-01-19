@@ -7,6 +7,7 @@ interface WebsiteAction {
 
 interface Website {
     url: string;
+    favicon: string;
     actions: WebsiteAction[];
 }
 

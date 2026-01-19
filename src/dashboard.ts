@@ -7,6 +7,7 @@ interface WebsiteAction {
 
 interface Website {
     url: string;
+    favicon: string;
     actions: WebsiteAction[];
 }
 
@@ -74,9 +75,22 @@ document.addEventListener('DOMContentLoaded', () => {
         sidebarLinks.innerHTML = '';
         addedWebsites.forEach(site => {
             const link = document.createElement('a');
-            link.className = 'list-group-item list-group-item-action';
+            link.className = 'list-group-item list-group-item-action d-flex align-items-center';
             if (selectedWebsite && site.url === selectedWebsite.url) link.classList.add('active');
-            link.textContent = site.url;
+            
+            if (site.favicon) {
+                const img = document.createElement('img');
+                img.src = site.favicon;
+                img.width = 16;
+                img.height = 16;
+                img.className = 'me-2';
+                link.appendChild(img);
+            }
+
+            const span = document.createElement('span');
+            span.textContent = site.url;
+            link.appendChild(span);
+
             link.href = '#';
             link.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -128,8 +142,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (url) {
             const existing = addedWebsites.find(s => s.url === url);
             if (!existing) {
+                const favicon = `https://www.google.com/s2/favicons?domain=${url}&sz=32`;
                 const newSite: Website = {
                     url,
+                    favicon,
                     actions: []
                 };
                 addedWebsites.push(newSite);
