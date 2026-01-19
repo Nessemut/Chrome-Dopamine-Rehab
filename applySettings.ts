@@ -7,7 +7,7 @@ const applySettings = () => {
     const keysToGet = ['customSiteSettings'];
 
     chrome.storage.sync.get(keysToGet, (items: { [key: string]: any }) => {
-        let isSiteBW = false;
+        let isSiteGrayscale = false;
         let isSiteClose = false;
 
         const customSiteSettings: CustomSiteSettings = items.customSiteSettings || {};
@@ -15,7 +15,7 @@ const applySettings = () => {
         for (const [url, behavior] of Object.entries(customSiteSettings)) {
             // Exact domain match or subdomain match
             if (hostname === url || hostname.endsWith('.' + url)) {
-                if (behavior === 'bw') isSiteBW = true;
+                if (behavior === 'grayscale') isSiteGrayscale = true;
                 if (behavior === 'close') isSiteClose = true;
             }
         }
@@ -25,7 +25,7 @@ const applySettings = () => {
             return;
         }
 
-        else if (isSiteBW) {
+        else if (isSiteGrayscale) {
             const style = document.createElement('style');
             style.innerHTML = `
                 html {

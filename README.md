@@ -5,7 +5,7 @@ A Chrome extension to help manage time on addictive sites.
 ## Features
 
 - **Universal Site Management**: Add any website domain for custom behavior control
-- **Flexible Actions**: Apply Nothing, Black & White, or Force Close to any site
+- **Flexible Actions**: Apply Nothing, Grayscale, or Force Close to any site
 - **Domain Intelligence**: Supports both exact domain matching and subdomain detection
 - **Easy Management**: Add, configure, and remove custom sites with a simple interface
 

@@ -16,10 +16,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedUrl: string | null = null;
 
     const SITE_ACTIONS = [
-        { value: 'none', text: 'Nothing' },
-        { value: 'bw', text: 'Black & White' },
-        { value: 'redirect', text: 'Redirect to another page' },
-        { value: 'close', text: 'Force Close' }
+        {value: 'none', text: 'Nothing'},
+        {
+            value: 'grayscale',
+            text: 'Grayscale',
+            hint: 'Grayscale reduces visual stimulation, preventing unnecessary dopamine spikes and making it easier for your brain to focus calmly instead of chasing novelty.'
+        },
+        {value: 'redirect', text: 'Redirect to another page'},
+        {value: 'close', text: 'Force Close'}
     ];
 
     SITE_ACTIONS.forEach(opt => {
