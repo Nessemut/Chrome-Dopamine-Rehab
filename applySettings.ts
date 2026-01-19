@@ -1,22 +1,33 @@
-interface CustomSiteSettings {
-    [url: string]: string;
+interface WebsiteAction {
+    action: {
+        value: string;
+        options: any;
+    };
+}
+
+interface Website {
+    url: string;
+    actions: WebsiteAction[];
 }
 
 const applySettings = () => {
     const hostname = window.location.hostname;
-    const keysToGet = ['customSiteSettings'];
+    const keysToGet = ['addedWebsites'];
 
     chrome.storage.sync.get(keysToGet, (items: { [key: string]: any }) => {
         let isSiteGrayscale = false;
         let isSiteClose = false;
 
-        const customSiteSettings: CustomSiteSettings = items.customSiteSettings || {};
+        const addedWebsites: Website[] = items.addedWebsites || [];
 
-        for (const [url, behavior] of Object.entries(customSiteSettings)) {
-            // Exact domain match or subdomain match
+        for (const site of addedWebsites) {
+            const url = site.url;
             if (hostname === url || hostname.endsWith('.' + url)) {
-                if (behavior === 'grayscale') isSiteGrayscale = true;
-                if (behavior === 'close') isSiteClose = true;
+                for (const actionObj of site.actions) {
+                    const behavior = actionObj.action.value;
+                    if (behavior === 'grayscale') isSiteGrayscale = true;
+                    if (behavior === 'close') isSiteClose = true;
+                }
             }
         }
 

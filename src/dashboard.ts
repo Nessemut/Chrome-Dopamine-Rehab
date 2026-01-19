@@ -1,3 +1,15 @@
+interface WebsiteAction {
+    action: {
+        value: string;
+        options: any;
+    };
+}
+
+interface Website {
+    url: string;
+    actions: WebsiteAction[];
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const customUrlInput = document.getElementById('custom-url-input') as HTMLInputElement;
     const addCustomUrlBtn = document.getElementById('add-custom-url-btn') as HTMLButtonElement;
@@ -11,9 +23,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveBtn = document.getElementById('save-btn') as HTMLButtonElement;
     const status = document.getElementById('status') as HTMLSpanElement;
 
-    let customUrlsList: string[] = [];
-    let customSiteSettings: { [url: string]: string } = {};
-    let selectedUrl: string | null = null;
+    let addedWebsites: Website[] = [];
+    let selectedWebsite: Website | null = null;
+    let isLoaded = false;
 
     const SITE_ACTIONS = [
         {value: 'none', text: 'Nothing'},
@@ -34,53 +46,76 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function loadSettings() {
-        chrome.storage.sync.get(['customUrls', 'customSiteSettings'], (items) => {
-            if (items.customUrls && Array.isArray(items.customUrls)) {
-                customUrlsList = items.customUrls;
+        chrome.storage.sync.get(['addedWebsites'], (items) => {
+            if (items.addedWebsites) {
+                addedWebsites = items.addedWebsites;
             }
-            customSiteSettings = items.customSiteSettings || {};
+
+            isLoaded = true;
             renderSidebar();
 
-            if (customUrlsList.length > 0 && !selectedUrl) {
-                selectSite(customUrlsList[0]);
+            if (addedWebsites.length > 0) {
+                if (selectedWebsite) {
+                    const found = addedWebsites.find(s => s.url === selectedWebsite!.url);
+                    if (found) {
+                        selectedWebsite = found;
+                        selectSite(selectedWebsite.url);
+                    } else {
+                        selectSite(addedWebsites[0].url);
+                    }
+                } else {
+                    selectSite(addedWebsites[0].url);
+                }
             }
         });
     }
 
     function renderSidebar() {
         sidebarLinks.innerHTML = '';
-        customUrlsList.forEach(url => {
+        addedWebsites.forEach(site => {
             const link = document.createElement('a');
             link.className = 'list-group-item list-group-item-action';
-            if (url === selectedUrl) link.classList.add('active');
-            link.textContent = url;
+            if (selectedWebsite && site.url === selectedWebsite.url) link.classList.add('active');
+            link.textContent = site.url;
             link.href = '#';
             link.addEventListener('click', (e) => {
                 e.preventDefault();
-                selectSite(url);
+                selectSite(site.url);
             });
             sidebarLinks.appendChild(link);
         });
     }
 
     function selectSite(url: string) {
-        selectedUrl = url;
+        selectedWebsite = addedWebsites.find(s => s.url === url) || null;
         renderSidebar();
         
-        selectedUrlTitle.textContent = url;
-        currentSiteDisplay.textContent = url;
-        siteActionSelect.value = customSiteSettings[url] || 'none';
-        
-        configPanel.classList.remove('d-none');
-        noSelectionMsg.classList.add('d-none');
+        if (selectedWebsite) {
+            selectedUrlTitle.textContent = selectedWebsite.url;
+            currentSiteDisplay.textContent = selectedWebsite.url;
+            const currentAction = selectedWebsite.actions[0]?.action.value || 'none';
+            siteActionSelect.value = currentAction;
+            
+            configPanel.classList.remove('d-none');
+            noSelectionMsg.classList.add('d-none');
+        } else {
+            configPanel.classList.add('d-none');
+            noSelectionMsg.classList.remove('d-none');
+        }
     }
 
     function saveSettings() {
         chrome.storage.sync.set({
-            customUrls: customUrlsList,
-            customSiteSettings: customSiteSettings
+            addedWebsites: addedWebsites
         }, () => {
-            status.textContent = 'Settings saved!';
+            if (chrome.runtime.lastError) {
+                console.error('Error saving settings:', chrome.runtime.lastError);
+                status.textContent = 'Error saving!';
+                status.className = 'status badge bg-danger text-white me-2';
+            } else {
+                status.textContent = 'Settings saved!';
+                status.className = 'status badge bg-info text-dark me-2';
+            }
             setTimeout(() => {
                 if (status) status.textContent = '';
             }, 2000);
@@ -88,32 +123,52 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     addCustomUrlBtn.addEventListener('click', () => {
+        if (!isLoaded) return;
         const url = customUrlInput.value.trim();
-        if (url && !customUrlsList.includes(url)) {
-            customUrlsList.push(url);
-            customUrlInput.value = '';
-            renderSidebar();
-            selectSite(url);
+        if (url) {
+            const existing = addedWebsites.find(s => s.url === url);
+            if (!existing) {
+                const newSite: Website = {
+                    url,
+                    actions: []
+                };
+                addedWebsites.push(newSite);
+                customUrlInput.value = '';
+                selectSite(url);
+                saveSettings();
+            } else {
+                selectSite(url);
+            }
         }
     });
 
     siteActionSelect.addEventListener('change', () => {
-        if (selectedUrl) {
-            customSiteSettings[selectedUrl] = siteActionSelect.value;
+        if (selectedWebsite) {
+            const newValue = siteActionSelect.value;
+            if (newValue === 'none') {
+                selectedWebsite.actions = [];
+            } else {
+                selectedWebsite.actions = [{
+                    action: {
+                        value: newValue,
+                        options: {}
+                    }
+                }];
+            }
             saveSettings();
         }
     });
 
     removeSiteBtn.addEventListener('click', () => {
-        if (selectedUrl) {
-            customUrlsList = customUrlsList.filter(u => u !== selectedUrl);
-            delete customSiteSettings[selectedUrl];
-            selectedUrl = null;
+        if (selectedWebsite) {
+            addedWebsites = addedWebsites.filter(s => s.url !== selectedWebsite!.url);
+            selectedWebsite = null;
             
             selectedUrlTitle.textContent = 'Select a site';
             configPanel.classList.add('d-none');
             noSelectionMsg.classList.remove('d-none');
             renderSidebar();
+            saveSettings();
         }
     });
 
