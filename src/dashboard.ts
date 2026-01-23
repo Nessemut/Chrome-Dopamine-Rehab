@@ -3,6 +3,10 @@ interface WebsiteAction {
         value: string;
         options: any;
     };
+    startTime: string;
+    endTime: string;
+    days: number[];
+    alwaysActive: boolean;
 }
 
 interface Website {
@@ -16,8 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const addCustomUrlBtn = document.getElementById('add-custom-url-btn') as HTMLButtonElement;
     const sidebarLinks = document.getElementById('sidebar-links') as HTMLDivElement;
     const selectedUrlTitle = document.getElementById('selected-url-title') as HTMLHeadingElement;
-    const currentSiteDisplay = document.getElementById('current-site-display') as HTMLSpanElement;
-    const siteActionSelect = document.getElementById('site-action-select') as HTMLSelectElement;
+    const actionsContainer = document.getElementById('actions-container') as HTMLDivElement;
+    const addActionBtn = document.getElementById('add-action-btn') as HTMLButtonElement;
     const removeSiteBtn = document.getElementById('remove-site-btn') as HTMLButtonElement;
     const configPanel = document.getElementById('config-panel') as HTMLDivElement;
     const noSelectionMsg = document.getElementById('no-selection-msg') as HTMLDivElement;
@@ -29,22 +33,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let isLoaded = false;
 
     const SITE_ACTIONS = [
-        {value: 'none', text: 'Nothing'},
-        {
-            value: 'grayscale',
-            text: 'Grayscale',
-            hint: 'Grayscale reduces visual stimulation, preventing unnecessary dopamine spikes and making it easier for your brain to focus calmly instead of chasing novelty.'
-        },
-        {value: 'redirect', text: 'Redirect to another page'},
+        {value: 'grayscale', text: 'Grayscale'},
         {value: 'close', text: 'Force Close'}
     ];
 
-    SITE_ACTIONS.forEach(opt => {
-        const option = document.createElement('option');
-        option.value = opt.value;
-        option.textContent = opt.text;
-        siteActionSelect.appendChild(option);
-    });
+    const DAYS_OF_WEEK = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
     function loadSettings() {
         chrome.storage.sync.get(['addedWebsites'], (items) => {
@@ -115,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 selectedUrlTitle.prepend(img);
             }
             renderActions();
-            
+
             configPanel.classList.remove('d-none');
             noSelectionMsg.classList.add('d-none');
         } else {
@@ -123,6 +116,137 @@ document.addEventListener('DOMContentLoaded', () => {
             noSelectionMsg.classList.remove('d-none');
         }
     }
+
+    function renderActions() {
+        if (!selectedWebsite) return;
+        actionsContainer.innerHTML = '';
+        actionsContainer.classList.add('row', 'g-4', 'ps-3');
+
+        addActionBtn.disabled = selectedWebsite.actions.some(a => a.alwaysActive);
+
+        selectedWebsite.actions.forEach((action, index) => {
+            const colWrapper = document.createElement('div');
+            colWrapper.className = 'col-5';
+
+            const actionRow = document.createElement('div');
+            actionRow.className = 'action-row card text-dark p-2 bg-secondary h-100';
+            let daysHtml = '';
+            DAYS_OF_WEEK.forEach((day, i) => {
+                const checked = action.days.includes(i) ? 'checked' : '';
+                const disabled = action.alwaysActive ? 'disabled' : '';
+                daysHtml += `
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input day-check" type="checkbox" value="${i}" id="day-${index}-${i}" ${checked} ${disabled}>
+                        <label class="form-check-label small" for="day-${index}-${i}">${day}</label>
+                    </div>
+                `;
+            });
+
+            actionRow.innerHTML = `
+                <div class="row g-2 align-items-center mb-4">
+                    <div class="col-md-3">
+                        <select class="form-select form-select-sm action-select">
+                            ${SITE_ACTIONS.map(opt => `<option value="${opt.value}" ${action.action.value === opt.value ? 'selected' : ''}>${opt.text}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text">From</span>
+                                    <input type="time" class="form-control start-time time-selector-input" value="${action.startTime}" ${action.alwaysActive ? 'disabled' : ''}>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text">To</span>
+                                    <input type="time" class="form-control end-time time-selector-input" value="${action.endTime}" ${action.alwaysActive ? 'disabled' : ''}>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="days-container">
+                    ${daysHtml}
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="form-check pt-1">
+                        <input class="form-check-input always-active-check" type="checkbox" id="always-${index}" ${action.alwaysActive ? 'checked' : ''}>
+                        <label class="form-check-label small" for="always-${index}">Always active</label>
+                    </div>
+                    <button class="btn btn-outline-danger btn-sm remove-action-btn">Delete action</button>
+                </div>
+            `;
+
+            const actionSelect = actionRow.querySelector('.action-select') as HTMLSelectElement;
+            actionSelect.addEventListener('change', () => {
+                action.action.value = actionSelect.value;
+                saveSettings();
+            });
+
+            const alwaysActiveCheck = actionRow.querySelector('.always-active-check') as HTMLInputElement;
+            alwaysActiveCheck.addEventListener('change', () => {
+                action.alwaysActive = alwaysActiveCheck.checked;
+                renderActions();
+                saveSettings();
+            });
+
+            const startTimeInput = actionRow.querySelector('.start-time') as HTMLInputElement;
+            startTimeInput.addEventListener('change', () => {
+                action.startTime = startTimeInput.value;
+                saveSettings();
+            });
+
+            const endTimeInput = actionRow.querySelector('.end-time') as HTMLInputElement;
+            endTimeInput.addEventListener('change', () => {
+                action.endTime = endTimeInput.value;
+                saveSettings();
+            });
+
+            const dayChecks = actionRow.querySelectorAll('.day-check') as NodeListOf<HTMLInputElement>;
+            dayChecks.forEach(check => {
+                check.addEventListener('change', () => {
+                    const day = parseInt(check.value);
+                    let newDays = [...action.days];
+                    if (check.checked) {
+                        newDays.push(day);
+                    } else {
+                        newDays = newDays.filter(d => d !== day);
+                    }
+
+                    action.days = newDays;
+                    saveSettings();
+                });
+            });
+
+            const removeActionBtn = actionRow.querySelector('.remove-action-btn') as HTMLButtonElement;
+            removeActionBtn.addEventListener('click', () => {
+                selectedWebsite!.actions.splice(index, 1);
+                renderActions();
+                saveSettings();
+            });
+
+            colWrapper.appendChild(actionRow);
+            actionsContainer.appendChild(colWrapper);
+        });
+    }
+
+    addActionBtn.addEventListener('click', () => {
+        if (selectedWebsite) {
+            //We default timings to usual core work schedules
+            const newAction: WebsiteAction = {
+                action: {value: 'grayscale', options: {}},
+                startTime: '09:00',
+                endTime: '18:00',
+                days: [0, 1, 2, 3, 4],
+                alwaysActive: false
+            };
+
+            selectedWebsite.actions.push(newAction);
+            renderActions();
+            saveSettings();
+        }
+    });
 
     function saveSettings() {
         chrome.storage.sync.set({
@@ -142,8 +266,22 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    removeSiteBtn.addEventListener('click', () => {
+        if (selectedWebsite) {
+            addedWebsites = addedWebsites.filter(s => s.url !== selectedWebsite!.url);
+            selectedWebsite = null;
+
+            selectedUrlTitle.textContent = 'Select a site';
+            configPanel.classList.add('d-none');
+            noSelectionMsg.classList.remove('d-none');
+            renderSidebar();
+            saveSettings();
+        }
+    });
+
     addCustomUrlBtn.addEventListener('click', () => {
         if (!isLoaded) return;
+        //TODO: validate URL format
         const url = customUrlInput.value.trim();
         if (url) {
             const existing = addedWebsites.find(s => s.url === url);
@@ -152,7 +290,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 const newSite: Website = {
                     url,
                     favicon,
-                    actions: []
+                    actions: [
+                        {
+                            action: {value: 'grayscale', options: {}},
+                            startTime: '00:00',
+                            endTime: '23:59',
+                            days: [0, 1, 2, 3, 4, 5, 6],
+                            alwaysActive: true
+                        }
+                    ]
                 };
                 addedWebsites.push(newSite);
                 customUrlInput.value = '';
@@ -161,36 +307,6 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 selectSite(url);
             }
-        }
-    });
-
-    siteActionSelect.addEventListener('change', () => {
-        if (selectedWebsite) {
-            const newValue = siteActionSelect.value;
-            if (newValue === 'none') {
-                selectedWebsite.actions = [];
-            } else {
-                selectedWebsite.actions = [{
-                    action: {
-                        value: newValue,
-                        options: {}
-                    }
-                }];
-            }
-            saveSettings();
-        }
-    });
-
-    removeSiteBtn.addEventListener('click', () => {
-        if (selectedWebsite) {
-            addedWebsites = addedWebsites.filter(s => s.url !== selectedWebsite!.url);
-            selectedWebsite = null;
-            
-            selectedUrlTitle.textContent = 'Select a site';
-            configPanel.classList.add('d-none');
-            noSelectionMsg.classList.remove('d-none');
-            renderSidebar();
-            saveSettings();
         }
     });
 

@@ -3,6 +3,10 @@ interface WebsiteAction {
         value: string;
         options: any;
     };
+    startTime: string;
+    endTime: string;
+    days: number[];
+    alwaysActive: boolean;
 }
 
 interface Website {
@@ -25,19 +29,18 @@ const applySettings = () => {
             const url = site.url;
             if (hostname === url || hostname.endsWith('.' + url)) {
                 for (const actionObj of site.actions) {
-                    const behavior = actionObj.action.value;
-                    if (behavior === 'grayscale') isSiteGrayscale = true;
-                    if (behavior === 'close') isSiteClose = true;
+                    if (actionObj.alwaysActive || isWithinTime(actionObj)) {
+                        const behavior = actionObj.action.value;
+                        if (behavior === 'grayscale') isSiteGrayscale = true;
+                        else if (behavior === 'close') isSiteClose = true;
+                    }
                 }
             }
         }
 
         if (isSiteClose) {
-            chrome.runtime.sendMessage({ action: 'closeTab' });
-            return;
-        }
-
-        else if (isSiteGrayscale) {
+            chrome.runtime.sendMessage({action: 'closeTab'});
+        } else if (isSiteGrayscale) {
             const style = document.createElement('style');
             style.innerHTML = `
                 html {
@@ -48,5 +51,24 @@ const applySettings = () => {
         }
     });
 };
+
+function isWithinTime(actionObj: WebsiteAction) {
+    const now = new Date();
+
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    const currentDay = now.getDay();
+
+    const timeToMinutes = (time: string): number => {
+        const [hours, minutes] = time.split(':').map(Number);
+        return hours * 60 + minutes;
+    };
+
+    const startMinutes = timeToMinutes(actionObj.startTime);
+    const endMinutes = timeToMinutes(actionObj.endTime);
+    const isWithinTime = currentMinutes >= startMinutes && currentMinutes < endMinutes;
+    const isRightDay = actionObj.days.includes(currentDay);
+
+    return isWithinTime && isRightDay;
+}
 
 applySettings();
