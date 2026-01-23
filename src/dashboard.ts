@@ -106,9 +106,15 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (selectedWebsite) {
             selectedUrlTitle.textContent = selectedWebsite.url;
-            currentSiteDisplay.textContent = selectedWebsite.url;
-            const currentAction = selectedWebsite.actions[0]?.action.value || 'none';
-            siteActionSelect.value = currentAction;
+            if (selectedWebsite.favicon) {
+                const img = document.createElement('img');
+                img.src = selectedWebsite.favicon;
+                img.width = 24;
+                img.height = 24;
+                img.className = 'me-2 mb-1';
+                selectedUrlTitle.prepend(img);
+            }
+            renderActions();
             
             configPanel.classList.remove('d-none');
             noSelectionMsg.classList.add('d-none');
