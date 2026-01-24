@@ -4,11 +4,16 @@
   "description": "A Chrome extension to help manage time on addictive sites",
   "main": "background.ts",
   "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w"
+    "build": "webpack --mode production",
+    "watch": "webpack --watch --mode development",
+    "dev": "webpack --mode development"
   },
   "devDependencies": {
+    "@types/chrome": "^0.0.254",
+    "copy-webpack-plugin": "^13.0.1",
+    "ts-loader": "^9.5.4",
     "typescript": "^5.0.0",
-    "@types/chrome": "^0.0.254"
+    "webpack": "^5.104.1",
+    "webpack-cli": "^6.0.1"
   }
 }
