@@ -267,6 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     removeSiteBtn.addEventListener('click', () => {
+        //TODO: ask for confirmation with a popup
         if (selectedWebsite) {
             addedWebsites = addedWebsites.filter(s => s.url !== selectedWebsite!.url);
             selectedWebsite = null;
