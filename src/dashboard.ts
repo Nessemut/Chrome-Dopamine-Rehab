@@ -23,6 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const DAYS_OF_WEEK = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
+    //TODO: implement CSS removal functionality
+
     function loadSettings() {
         chrome.storage.sync.get(['addedWebsites'], (items) => {
             if (items.addedWebsites) {
@@ -291,6 +293,8 @@ document.addEventListener('DOMContentLoaded', () => {
             saveSettings();
         }
     });
+
+    //TODO: implement settings export/import into a json file
 
     function saveSettings() {
         chrome.storage.sync.set({
