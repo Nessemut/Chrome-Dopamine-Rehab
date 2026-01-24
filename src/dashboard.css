@@ -82,3 +82,7 @@ body {
     background-color: #343a40 !important;
     opacity: 0.6;
 }
+
+.btn-outline-danger {
+    background-color: #422b2b;
+}
