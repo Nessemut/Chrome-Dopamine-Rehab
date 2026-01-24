@@ -1,19 +1,4 @@
-interface WebsiteAction {
-    action: {
-        value: string;
-        options: any;
-    };
-    startTime: string;
-    endTime: string;
-    days: number[];
-    alwaysActive: boolean;
-}
-
-interface Website {
-    url: string;
-    favicon: string;
-    actions: WebsiteAction[];
-}
+import { Website, WebsiteAction } from './website';
 
 document.addEventListener('DOMContentLoaded', () => {
     const customUrlInput = document.getElementById('custom-url-input') as HTMLInputElement;
@@ -25,7 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const removeSiteBtn = document.getElementById('remove-site-btn') as HTMLButtonElement;
     const configPanel = document.getElementById('config-panel') as HTMLDivElement;
     const noSelectionMsg = document.getElementById('no-selection-msg') as HTMLDivElement;
-    const saveBtn = document.getElementById('save-btn') as HTMLButtonElement;
     const status = document.getElementById('status') as HTMLSpanElement;
 
     let addedWebsites: Website[] = [];
@@ -120,16 +104,19 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderActions() {
         if (!selectedWebsite) return;
         actionsContainer.innerHTML = '';
-        actionsContainer.classList.add('row', 'g-4', 'ps-3');
+        actionsContainer.classList.add('row', 'g-4', 'ps-3', 'align-items-start');
 
-        addActionBtn.disabled = selectedWebsite.actions.some(a => a.alwaysActive);
+        const leftCol = document.createElement('div');
+        leftCol.className = 'col-5 d-flex flex-column gap-4';
+        const rightCol = document.createElement('div');
+        rightCol.className = 'col-5 d-flex flex-column gap-4';
+
+        actionsContainer.appendChild(leftCol);
+        actionsContainer.appendChild(rightCol);
 
         selectedWebsite.actions.forEach((action, index) => {
-            const colWrapper = document.createElement('div');
-            colWrapper.className = 'col-5';
-
             const actionRow = document.createElement('div');
-            actionRow.className = 'action-row card text-dark p-2 bg-secondary h-100';
+            actionRow.className = 'action-row card text-dark p-2 bg-secondary';
             let daysHtml = '';
             DAYS_OF_WEEK.forEach((day, i) => {
                 const checked = action.days.includes(i) ? 'checked' : '';
@@ -143,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             actionRow.innerHTML = `
-                <div class="row g-2 align-items-center mb-4">
+                <div class="row g-2 align-items-center mb-2">
                     <div class="col-md-3">
                         <select class="form-select form-select-sm action-select">
                             ${SITE_ACTIONS.map(opt => `<option value="${opt.value}" ${action.action.value === opt.value ? 'selected' : ''}>${opt.text}</option>`).join('')}
@@ -165,6 +152,26 @@ document.addEventListener('DOMContentLoaded', () => {
                             </div>
                         </div>
                     </div>
+                </div>
+                <div class="row g-2 align-items-center mb-1">
+                    <div class="col-md-7">
+                        <label class="small fw-bold">Paths</label>
+                    </div>
+                    <div class="col-md-5">
+                        <select class="form-select form-select-sm path-match-select" ${action.paths.length === 0 ? 'disabled' : ''}>
+                            <option value="include" ${action.pathMatch === 'include' ? 'selected' : ''}>Only these paths</option>
+                            <option value="exclude" ${action.pathMatch === 'exclude' ? 'selected' : ''}>Exclude these paths</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="paths-list mb-2">
+                    ${action.paths.map((p, i) => `
+                        <div class="input-group input-group-sm mb-1">
+                            <input type="text" class="form-control path-input" data-index="${i}" value="${p}" placeholder="e.g. /direct/inbox">
+                            <button class="btn btn-outline-danger remove-path-btn" data-index="${i}" type="button">&times;</button>
+                        </div>
+                    `).join('')}
+                    <button class="btn btn-link btn-sm p-0 text-decoration-none add-path-btn">+ Add Path</button>
                 </div>
                 <div class="days-container">
                     ${daysHtml}
@@ -203,6 +210,38 @@ document.addEventListener('DOMContentLoaded', () => {
                 saveSettings();
             });
 
+            const pathInputs = actionRow.querySelectorAll('.path-input') as NodeListOf<HTMLInputElement>;
+            pathInputs.forEach(input => {
+                input.addEventListener('change', () => {
+                    const pIndex = parseInt(input.dataset.index!);
+                    action.paths[pIndex] = input.value;
+                    saveSettings();
+                });
+            });
+
+            const removePathBtns = actionRow.querySelectorAll('.remove-path-btn') as NodeListOf<HTMLButtonElement>;
+            removePathBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const pIndex = parseInt(btn.dataset.index!);
+                    action.paths.splice(pIndex, 1);
+                    renderActions();
+                    saveSettings();
+                });
+            });
+
+            const addPathBtn = actionRow.querySelector('.add-path-btn') as HTMLButtonElement;
+            addPathBtn.addEventListener('click', () => {
+                action.paths.push('');
+                renderActions();
+                saveSettings();
+            });
+
+            const pathMatchSelect = actionRow.querySelector('.path-match-select') as HTMLSelectElement;
+            pathMatchSelect.addEventListener('change', () => {
+                action.pathMatch = pathMatchSelect.value as 'include' | 'exclude';
+                saveSettings();
+            });
+
             const dayChecks = actionRow.querySelectorAll('.day-check') as NodeListOf<HTMLInputElement>;
             dayChecks.forEach(check => {
                 check.addEventListener('change', () => {
@@ -226,8 +265,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 saveSettings();
             });
 
-            colWrapper.appendChild(actionRow);
-            actionsContainer.appendChild(colWrapper);
+            if (index % 2 === 0) {
+                leftCol.appendChild(actionRow);
+            } else {
+                rightCol.appendChild(actionRow);
+            }
         });
     }
 
@@ -239,7 +281,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 startTime: '09:00',
                 endTime: '18:00',
                 days: [0, 1, 2, 3, 4],
-                alwaysActive: false
+                alwaysActive: false,
+                paths: [],
+                pathMatch: 'include'
             };
 
             selectedWebsite.actions.push(newAction);
@@ -297,7 +341,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             startTime: '00:00',
                             endTime: '23:59',
                             days: [0, 1, 2, 3, 4, 5, 6],
-                            alwaysActive: true
+                            alwaysActive: true,
+                            paths: [],
+                            pathMatch: 'include'
                         }
                     ]
                 };
@@ -309,10 +355,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 selectSite(url);
             }
         }
-    });
-
-    saveBtn.addEventListener('click', () => {
-        saveSettings();
     });
 
     loadSettings();
