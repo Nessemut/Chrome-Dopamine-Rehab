@@ -140,10 +140,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             ${selectors.map((s: string, i: number) => `
                                 <div class="input-group input-group-sm mb-1">
                                     <input type="text" class="form-control selector-input" data-index="${i}" value="${s}" placeholder="e.g. .some-class or #some-id">
-                                    <button class="btn btn-outline-danger remove-selector-btn" data-index="${i}" type="button">&times;</button>
+                                    <button class="btn btn-danger remove-selector-btn" data-index="${i}" type="button">&times;</button>
                                 </div>
                             `).join('')}
-                            <button class="btn btn-link btn-sm p-0 text-decoration-none add-selector-btn">+ Add HTML class/ID</button>
+                            <button class="btn btn-primary btn-sm add-selector-btn">+ Add HTML class/ID</button>
                         </div>
                     </div>
                 `;
@@ -189,10 +189,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${action.paths.map((p, i) => `
                         <div class="input-group input-group-sm mb-1">
                             <input type="text" class="form-control path-input" data-index="${i}" value="${p}" placeholder="e.g. /direct/inbox">
-                            <button class="btn btn-outline-danger remove-path-btn" data-index="${i}" type="button">&times;</button>
+                            <button class="btn btn-danger remove-path-btn" data-index="${i}" type="button">&times;</button>
                         </div>
                     `).join('')}
-                    <button class="btn btn-link btn-sm p-0 text-decoration-none add-path-btn">+ Add Path</button>
+                    <button class="btn btn-dark btn-sm add-path-btn">+ Add Path</button>
                 </div>
                 <div class="days-container">
                     ${daysHtml}
@@ -202,7 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <input class="form-check-input always-active-check" type="checkbox" id="always-${index}" ${action.alwaysActive ? 'checked' : ''}>
                         <label class="form-check-label small" for="always-${index}">Always active</label>
                     </div>
-                    <button class="btn btn-outline-danger btn-sm remove-action-btn">Delete action</button>
+                    <button class="btn btn-danger btn-sm remove-action-btn">Delete action</button>
                 </div>
             `;
 
