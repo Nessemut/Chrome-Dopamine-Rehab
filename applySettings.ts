@@ -18,6 +18,7 @@ const applySettings = () => {
 
     chrome.storage.sync.get(keysToGet, (items: { [key: string]: any }) => {
         let isSiteGrayscale = false;
+        let grayscalePercentage = 100;
         let isSiteClose = false;
         let selectorsToRemove: string[] = [];
 
@@ -39,7 +40,12 @@ const applySettings = () => {
                     if (timeMatches && pathMatches) {
                         const behavior = actionObj.action.value;
                         if (behavior === 'close') isSiteClose = true;
-                        else if (behavior === 'grayscale') isSiteGrayscale = true;
+                        else if (behavior === 'grayscale') {
+                            isSiteGrayscale = true;
+                            if (actionObj.action.options.grayscalePercentage !== undefined) {
+                                grayscalePercentage = actionObj.action.options.grayscalePercentage;
+                            }
+                        }
                         else if (behavior === 'removeHtmlSelectors' && actionObj.action.options.htmlSelectorsToRemove) {
                             selectorsToRemove.push(...actionObj.action.options.htmlSelectorsToRemove);
                         }
@@ -57,7 +63,7 @@ const applySettings = () => {
             style.id = 'dopamine-rehab-style';
             style.innerHTML = `
                 html {
-                    filter: grayscale(100%) !important;
+                    filter: grayscale(${grayscalePercentage}%) !important;
                 }
             `;
             document.documentElement.appendChild(style);

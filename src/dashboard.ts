@@ -130,6 +130,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
             });
 
+            let grayscaleOptionsHtml = '';
+            if (action.action.value === 'grayscale') {
+                const percentage = action.action.options.grayscalePercentage !== undefined ? action.action.options.grayscalePercentage : 100;
+                grayscaleOptionsHtml = `
+                    <div class="grayscale-options-container mt-2 col-4">
+                        <label class="small fw-bold">Grayscale Intensity: <span class="grayscale-percentage-label">${percentage}</span>%</label>
+                        <input type="range" class="form-range grayscale-range" min="0" max="100" value="${percentage}">
+                    </div>
+                `;
+            }
+
             let selectorsToRemoveHtml = '';
             if (action.action.value === 'removeHtmlSelectors') {
                 const selectors = action.action.options.htmlSelectorsToRemove || [];
@@ -173,6 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>
                 </div>
+                ${grayscaleOptionsHtml}
                 ${selectorsToRemoveHtml}
                 <div class="row g-2 align-items-center mb-1">
                     <div class="col-md-7">
@@ -212,9 +224,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (action.action.value === 'removeHtmlSelectors' && !action.action.options.htmlSelectorsToRemove) {
                     action.action.options.htmlSelectorsToRemove = [];
                 }
+                if (action.action.value === 'grayscale' && action.action.options.grayscalePercentage === undefined) {
+                    action.action.options.grayscalePercentage = 100;
+                }
                 renderActions();
                 saveSettings();
             });
+
+            const grayscaleRange = actionRow.querySelector('.grayscale-range') as HTMLInputElement;
+            if (grayscaleRange) {
+                const label = actionRow.querySelector('.grayscale-percentage-label') as HTMLSpanElement;
+                grayscaleRange.addEventListener('input', () => {
+                    label.textContent = grayscaleRange.value;
+                });
+                grayscaleRange.addEventListener('change', () => {
+                    action.action.options.grayscalePercentage = parseInt(grayscaleRange.value);
+                    saveSettings();
+                });
+            }
 
             const alwaysActiveCheck = actionRow.querySelector('.always-active-check') as HTMLInputElement;
             alwaysActiveCheck.addEventListener('change', () => {
