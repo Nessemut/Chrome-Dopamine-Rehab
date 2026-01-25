@@ -18,12 +18,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const SITE_ACTIONS = [
         {value: 'grayscale', text: 'Grayscale'},
-        {value: 'close', text: 'Force Close'}
+        {value: 'close', text: 'Force Close'},
+        {value: 'removeHtmlSelectors', text: 'Remove HTML Selectors'}
     ];
 
     const DAYS_OF_WEEK = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
-    //TODO: implement CSS removal functionality
 
     function loadSettings() {
         chrome.storage.sync.get(['addedWebsites'], (items) => {
@@ -109,9 +108,9 @@ document.addEventListener('DOMContentLoaded', () => {
         actionsContainer.classList.add('row', 'g-4', 'ps-3', 'align-items-start');
 
         const leftCol = document.createElement('div');
-        leftCol.className = 'col-5 d-flex flex-column gap-4';
+        leftCol.className = 'col-6 d-flex flex-column gap-4';
         const rightCol = document.createElement('div');
-        rightCol.className = 'col-5 d-flex flex-column gap-4';
+        rightCol.className = 'col-6 d-flex flex-column gap-4';
 
         actionsContainer.appendChild(leftCol);
         actionsContainer.appendChild(rightCol);
@@ -130,6 +129,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 `;
             });
+
+            let selectorsToRemoveHtml = '';
+            if (action.action.value === 'removeHtmlSelectors') {
+                const selectors = action.action.options.htmlSelectorsToRemove || [];
+                selectorsToRemoveHtml = `
+                    <div class="html-selectors-container mt-2">
+                        <label class="small fw-bold">HTML Classes/IDs to Remove</label>
+                        <div class="selectors-list">
+                            ${selectors.map((s: string, i: number) => `
+                                <div class="input-group input-group-sm mb-1">
+                                    <input type="text" class="form-control selector-input" data-index="${i}" value="${s}" placeholder="e.g. .some-class or #some-id">
+                                    <button class="btn btn-outline-danger remove-selector-btn" data-index="${i}" type="button">&times;</button>
+                                </div>
+                            `).join('')}
+                            <button class="btn btn-link btn-sm p-0 text-decoration-none add-selector-btn">+ Add HTML class/ID</button>
+                        </div>
+                    </div>
+                `;
+            }
 
             actionRow.innerHTML = `
                 <div class="row g-2 align-items-center mb-2">
@@ -155,6 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>
                 </div>
+                ${selectorsToRemoveHtml}
                 <div class="row g-2 align-items-center mb-1">
                     <div class="col-md-7">
                         <label class="small fw-bold">Paths</label>
@@ -190,6 +209,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const actionSelect = actionRow.querySelector('.action-select') as HTMLSelectElement;
             actionSelect.addEventListener('change', () => {
                 action.action.value = actionSelect.value;
+                if (action.action.value === 'removeHtmlSelectors' && !action.action.options.htmlSelectorsToRemove) {
+                    action.action.options.htmlSelectorsToRemove = [];
+                }
+                renderActions();
                 saveSettings();
             });
 
@@ -221,11 +244,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             });
 
+            const selectorInputs = actionRow.querySelectorAll('.selector-input') as NodeListOf<HTMLInputElement>;
+            selectorInputs.forEach(input => {
+                input.addEventListener('change', () => {
+                    const cIndex = parseInt(input.dataset.index!);
+                    action.action.options.htmlSelectorsToRemove[cIndex] = input.value;
+                    saveSettings();
+                });
+            });
+
             const removePathBtns = actionRow.querySelectorAll('.remove-path-btn') as NodeListOf<HTMLButtonElement>;
             removePathBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
                     const pIndex = parseInt(btn.dataset.index!);
                     action.paths.splice(pIndex, 1);
+                    renderActions();
+                    saveSettings();
+                });
+            });
+
+            const removeSelectorBtns = actionRow.querySelectorAll('.remove-selector-btn') as NodeListOf<HTMLButtonElement>;
+            removeSelectorBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const cIndex = parseInt(btn.dataset.index!);
+                    action.action.options.htmlSelectorsToRemove.splice(cIndex, 1);
                     renderActions();
                     saveSettings();
                 });
@@ -237,6 +279,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderActions();
                 saveSettings();
             });
+
+            const addSelectorBtn = actionRow.querySelector('.add-selector-btn') as HTMLButtonElement;
+            if (addSelectorBtn) {
+                addSelectorBtn.addEventListener('click', () => {
+                    if (!action.action.options.htmlSelectorsToRemove) {
+                        action.action.options.htmlSelectorsToRemove = [];
+                    }
+                    action.action.options.htmlSelectorsToRemove.push('');
+                    renderActions();
+                    saveSettings();
+                });
+            }
 
             const pathMatchSelect = actionRow.querySelector('.path-match-select') as HTMLSelectElement;
             pathMatchSelect.addEventListener('change', () => {

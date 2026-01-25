@@ -1,10 +1,16 @@
 import { Website, WebsiteAction } from './src/website';
 
+let currentObserver: MutationObserver | null = null;
+
 const applySettings = () => {
     const hostname = window.location.hostname;
     const keysToGet = ['addedWebsites'];
 
-    // Remove any existing grayscale style
+    if (currentObserver) {
+        currentObserver.disconnect();
+        currentObserver = null;
+    }
+
     const existingStyle = document.getElementById('dopamine-rehab-style');
     if (existingStyle) {
         existingStyle.remove();
@@ -13,6 +19,7 @@ const applySettings = () => {
     chrome.storage.sync.get(keysToGet, (items: { [key: string]: any }) => {
         let isSiteGrayscale = false;
         let isSiteClose = false;
+        let selectorsToRemove: string[] = [];
 
         const addedWebsites: Website[] = items.addedWebsites || [];
 
@@ -33,6 +40,9 @@ const applySettings = () => {
                         const behavior = actionObj.action.value;
                         if (behavior === 'close') isSiteClose = true;
                         else if (behavior === 'grayscale') isSiteGrayscale = true;
+                        else if (behavior === 'removeHtmlSelectors' && actionObj.action.options.htmlSelectorsToRemove) {
+                            selectorsToRemove.push(...actionObj.action.options.htmlSelectorsToRemove);
+                        }
                     }
                 }
             }
@@ -40,7 +50,9 @@ const applySettings = () => {
 
         if (isSiteClose) {
             chrome.runtime.sendMessage({action: 'closeTab'});
-        } else if (isSiteGrayscale) {
+        }
+
+        if (isSiteGrayscale) {
             const style = document.createElement('style');
             style.id = 'dopamine-rehab-style';
             style.innerHTML = `
@@ -49,6 +61,17 @@ const applySettings = () => {
                 }
             `;
             document.documentElement.appendChild(style);
+        }
+
+        if (selectorsToRemove.length !== 0) {
+            removeElements(selectorsToRemove);
+            currentObserver = new MutationObserver(() => {
+                removeElements(selectorsToRemove);
+            });
+            currentObserver.observe(document.documentElement, {
+                childList: true,
+                subtree: true
+            });
         }
     });
 };
@@ -73,6 +96,19 @@ function isWithinTime(actionObj: WebsiteAction) {
 
     return isWithinTime && isRightDay;
 }
+
+const removeElements = (selectors: string[]) => {
+    for (const selector of selectors) {
+        if (!selector) continue;
+        let elements: NodeListOf<Element>;
+        if (selector.startsWith('.') || selector.startsWith('#')) {
+            elements = document.querySelectorAll(selector);
+        } else {
+            elements = document.querySelectorAll(`.${selector}, #${selector}`);
+        }
+        elements.forEach(el => el.remove());
+    }
+};
 
 // Initial run
 applySettings();
