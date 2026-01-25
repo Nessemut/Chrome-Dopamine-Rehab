@@ -1,15 +1,26 @@
 # Dopamine Rehab Chrome Plugin
 
-A Chrome extension to help manage time on addictive sites.
+A powerful Chrome extension designed to help you regain control over your digital habits by managing time spent on addictive websites.
 
-## Features
+## 🚀 Key Features
 
-- **Universal Site Management**: Add any website domain for custom behavior control
-- **Flexible Actions**: Apply Grayscale or Force Close to any site
-- **Domain Intelligence**: Supports both exact domain matching and subdomain detection
-- **Easy Management**: Add, configure, and remove custom sites with a simple interface
+- **Universal Site Management**: Add any website domain to start managing your digital intake.
+- **Multiple Actions per Site**: Configure multiple rules for the same website to handle different scenarios.
+- **Advanced Scheduling**:
+  - **Time Windows**: Set specific start and end times for when an action should be active.
+  - **Day Selection**: Choose specific days of the week (e.g., only weekdays or only weekends).
+  - **Always Active**: Option to keep rules running 24/7.
+- **Granular Path Control**: 
+  - Apply actions only to specific URL paths (e.g., `/direct/inbox` or `/reels`).
+  - Use **Include** or **Exclude** logic to target exactly what you want to see or avoid.
+- **Powerful Website Actions**:
+  - **Grayscale**: Remove color from websites to make them less stimulating. Now includes a **configurable intensity slider** (0% to 100%).
+  - **Force Close**: Automatically close the tab when you shouldn't be browsing.
+  - **Remove HTML Elements**: Hide distracting UI elements (like feed containers, notification badges, or sidebar ads) by their **HTML class or ID**.
+- **Sleek Dashboard**: A dedicated configuration page to manage all your settings in one place.
 
-## How to Build and Install
+## 🛠 How to Build and Install
+
 ### Building from Source
 
 1.  **Install Dependencies**: Run `npm install` in the project root.
@@ -23,10 +34,3 @@ A Chrome extension to help manage time on addictive sites.
 3.  Enable **Developer mode** in the top right.
 4.  Click **Load unpacked**.
 5.  Select the `dist` folder in the project directory.
-
-## Project Structure
-
-- `manifest.json`: The extension's configuration file.
-- `src/`: Contains the source code for the dashboard.
-- `dashboard.html`: The HTML structure for the configuration dashboard.
-- `dashboard.ts`: Logic for saving and loading settings using Chrome's storage API.
