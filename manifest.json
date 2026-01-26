@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Dopamine Rehab",
   "version": "1.0",
-  "description": "A Chrome extension to help manage time on addictive sites",
+  "description": "A highly configurable Chrome extension to help manage time on addictive sites.",
   "permissions": [
     "storage",
     "tabs",

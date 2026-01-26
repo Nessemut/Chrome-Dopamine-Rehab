@@ -1,4 +1,7 @@
 import { Website, WebsiteAction } from './website';
+import * as bootstrap from 'bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './dashboard.css';
 
 document.addEventListener('DOMContentLoaded', () => {
     const customUrlInput = document.getElementById('custom-url-input') as HTMLInputElement;
@@ -11,6 +14,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const configPanel = document.getElementById('config-panel') as HTMLDivElement;
     const noSelectionMsg = document.getElementById('no-selection-msg') as HTMLDivElement;
     const status = document.getElementById('status') as HTMLSpanElement;
+    const confirmDeleteModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal') as HTMLElement);
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn') as HTMLButtonElement;
+    const confirmDeleteModalBody = document.getElementById('confirmDeleteModalBody') as HTMLDivElement;
 
     let addedWebsites: Website[] = [];
     let selectedWebsite: Website | null = null;
@@ -23,6 +29,21 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     const DAYS_OF_WEEK = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+    let onConfirmDelete: (() => void) | null = null;
+
+    confirmDeleteBtn.addEventListener('click', () => {
+        if (onConfirmDelete) {
+            onConfirmDelete();
+            confirmDeleteModal.hide();
+        }
+    });
+
+    function showConfirmModal(message: string, onConfirm: () => void) {
+        confirmDeleteModalBody.textContent = message;
+        onConfirmDelete = onConfirm;
+        confirmDeleteModal.show();
+    }
 
     function loadSettings() {
         chrome.storage.sync.get(['addedWebsites'], (items) => {
@@ -283,20 +304,24 @@ document.addEventListener('DOMContentLoaded', () => {
             const removePathBtns = actionRow.querySelectorAll('.remove-path-btn') as NodeListOf<HTMLButtonElement>;
             removePathBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
-                    const pIndex = parseInt(btn.dataset.index!);
-                    action.paths.splice(pIndex, 1);
-                    renderActions();
-                    saveSettings();
+                    showConfirmModal('Are you sure you want to delete this path?', () => {
+                        const pIndex = parseInt(btn.dataset.index!);
+                        action.paths.splice(pIndex, 1);
+                        renderActions();
+                        saveSettings();
+                    });
                 });
             });
 
             const removeSelectorBtns = actionRow.querySelectorAll('.remove-selector-btn') as NodeListOf<HTMLButtonElement>;
             removeSelectorBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
-                    const cIndex = parseInt(btn.dataset.index!);
-                    action.action.options.htmlSelectorsToRemove.splice(cIndex, 1);
-                    renderActions();
-                    saveSettings();
+                    showConfirmModal('Are you sure you want to delete this HTML selector?', () => {
+                        const cIndex = parseInt(btn.dataset.index!);
+                        action.action.options.htmlSelectorsToRemove.splice(cIndex, 1);
+                        renderActions();
+                        saveSettings();
+                    });
                 });
             });
 
@@ -343,9 +368,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const removeActionBtn = actionRow.querySelector('.remove-action-btn') as HTMLButtonElement;
             removeActionBtn.addEventListener('click', () => {
-                selectedWebsite!.actions.splice(index, 1);
-                renderActions();
-                saveSettings();
+                showConfirmModal('Are you sure you want to delete this action?', () => {
+                    selectedWebsite!.actions.splice(index, 1);
+                    renderActions();
+                    saveSettings();
+                });
             });
 
             if (index % 2 === 0) {
@@ -396,16 +423,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     removeSiteBtn.addEventListener('click', () => {
-        //TODO: ask for confirmation with a popup
         if (selectedWebsite) {
-            addedWebsites = addedWebsites.filter(s => s.url !== selectedWebsite!.url);
-            selectedWebsite = null;
+            showConfirmModal(`Are you sure you want to remove ${selectedWebsite.url} and all its configuration?`, () => {
+                addedWebsites = addedWebsites.filter(s => s.url !== selectedWebsite!.url);
+                selectedWebsite = null;
 
-            selectedUrlTitle.textContent = 'Select a site';
-            configPanel.classList.add('d-none');
-            noSelectionMsg.classList.remove('d-none');
-            renderSidebar();
-            saveSettings();
+                selectedUrlTitle.textContent = 'Select a site';
+                configPanel.classList.add('d-none');
+                noSelectionMsg.classList.remove('d-none');
+                renderSidebar();
+                saveSettings();
+            });
         }
     });
 

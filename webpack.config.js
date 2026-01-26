@@ -20,6 +20,10 @@ module.exports = {
         use: 'ts-loader',
         exclude: /node_modules/,
       },
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader'],
+      },
     ],
   },
   resolve: {
@@ -30,7 +34,6 @@ module.exports = {
       patterns: [
         { from: 'manifest.json', to: '.' },
         { from: 'src/dashboard.html', to: 'src' },
-        { from: 'src/dashboard.css', to: 'src' },
         { from: 'icons', to: 'icons' },
       ],
     }),
