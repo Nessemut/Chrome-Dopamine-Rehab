@@ -4,8 +4,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './dashboard.css';
 
 document.addEventListener('DOMContentLoaded', () => {
+    const customUrlForm = document.getElementById('custom-url-form') as HTMLFormElement;
     const customUrlInput = document.getElementById('custom-url-input') as HTMLInputElement;
-    const addCustomUrlBtn = document.getElementById('add-custom-url-btn') as HTMLButtonElement;
     const sidebarLinks = document.getElementById('sidebar-links') as HTMLDivElement;
     const selectedUrlTitle = document.getElementById('selected-url-title') as HTMLHeadingElement;
     const actionsContainer = document.getElementById('actions-container') as HTMLDivElement;
@@ -437,10 +437,38 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    addCustomUrlBtn.addEventListener('click', () => {
+    function getHostname(input: string): string | null {
+        let urlString = input.trim();
+        if (!urlString) return null;
+
+        try {
+            if (urlString.includes('://')) {
+                const url = new URL(urlString);
+                return url.hostname;
+            }
+            const url = new URL('https://' + urlString);
+            const hostname = url.hostname;
+            
+            if (hostname === 'localhost' || (hostname.includes('.') && hostname.split('.').pop()!.length >= 2)) {
+                return hostname;
+            }
+        } catch (e) {
+            // Invalid URL/hostname
+        }
+        return null;
+    }
+
+    customUrlInput.addEventListener('input', () => {
+        customUrlInput.classList.remove('is-invalid');
+    });
+
+    customUrlForm.addEventListener('submit', (e) => {
+        e.preventDefault();
         if (!isLoaded) return;
-        //TODO: validate URL format
-        const url = customUrlInput.value.trim();
+        
+        const input = customUrlInput.value.trim();
+        const url = getHostname(input);
+
         if (url) {
             const existing = addedWebsites.find(s => s.url === url);
             if (!existing) {
@@ -465,8 +493,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 selectSite(url);
                 saveSettings();
             } else {
+                customUrlInput.value = '';
                 selectSite(url);
             }
+        } else {
+            customUrlInput.classList.add('is-invalid');
         }
     });
 
