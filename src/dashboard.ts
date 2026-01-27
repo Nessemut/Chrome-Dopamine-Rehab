@@ -2,8 +2,10 @@ import { Website, WebsiteAction } from './website';
 import * as bootstrap from 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './dashboard.css';
+import { injectNavbar } from './navbar';
 
 document.addEventListener('DOMContentLoaded', () => {
+    injectNavbar();
     const customUrlForm = document.getElementById('custom-url-form') as HTMLFormElement;
     const customUrlInput = document.getElementById('custom-url-input') as HTMLInputElement;
     const sidebarLinks = document.getElementById('sidebar-links') as HTMLDivElement;

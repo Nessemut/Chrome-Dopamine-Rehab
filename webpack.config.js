@@ -6,6 +6,7 @@ module.exports = {
   entry: {
     background: './background.ts',
     dashboard: './src/dashboard.ts',
+    about: './src/about.ts',
     applySettings: './applySettings.ts',
   },
   output: {
@@ -34,6 +35,7 @@ module.exports = {
       patterns: [
         { from: 'manifest.json', to: '.' },
         { from: 'src/dashboard.html', to: 'src' },
+        { from: 'src/about.html', to: 'src' },
         { from: 'icons', to: 'icons' },
       ],
     }),
