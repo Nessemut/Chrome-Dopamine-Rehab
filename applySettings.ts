@@ -1,10 +1,10 @@
 import { Website, WebsiteAction } from './src/website';
+import { loadSettings } from './src/storage';
 
 let currentObserver: MutationObserver | null = null;
 
 const applySettings = () => {
     const hostname = window.location.hostname;
-    const keysToGet = ['addedWebsites'];
 
     if (currentObserver) {
         currentObserver.disconnect();
@@ -16,13 +16,11 @@ const applySettings = () => {
         existingStyle.remove();
     }
 
-    chrome.storage.sync.get(keysToGet, (items: { [key: string]: any }) => {
+    loadSettings().then((addedWebsites) => {
         let isSiteGrayscale = false;
         let grayscalePercentage = 100;
         let isSiteClose = false;
         let selectorsToRemove: string[] = [];
-
-        const addedWebsites: Website[] = items.addedWebsites || [];
 
         for (const site of addedWebsites) {
             const url = site.url;
@@ -79,6 +77,8 @@ const applySettings = () => {
                 subtree: true
             });
         }
+    }).catch(err => {
+        console.error('Error loading settings:', err);
     });
 };
 

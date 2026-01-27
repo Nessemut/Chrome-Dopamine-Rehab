@@ -5,8 +5,8 @@ module.exports = {
   mode: 'production',
   entry: {
     background: './background.ts',
-    dashboard: './src/dashboard.ts',
-    about: './src/about.ts',
+    dashboard: './src/dashboard/dashboard.ts',
+    about: './src/about/about.ts',
     applySettings: './applySettings.ts',
   },
   output: {
@@ -34,8 +34,8 @@ module.exports = {
     new CopyPlugin({
       patterns: [
         { from: 'manifest.json', to: '.' },
-        { from: 'src/dashboard.html', to: 'src' },
-        { from: 'src/about.html', to: 'src' },
+        { from: 'src/dashboard/dashboard.html', to: 'src' },
+        { from: 'src/about/about.html', to: 'src' },
         { from: 'icons', to: 'icons' },
       ],
     }),

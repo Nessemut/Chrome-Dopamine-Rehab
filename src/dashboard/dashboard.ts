@@ -1,8 +1,9 @@
-import { Website, WebsiteAction } from './website';
+import { Website, WebsiteAction } from '../website';
 import * as bootstrap from 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './dashboard.css';
-import { injectNavbar } from './navbar';
+import { injectNavbar } from '../navbar';
+import { loadSettings as loadSettingsFromStorage, saveSettings as saveSettingsToStorage } from '../storage';
 
 document.addEventListener('DOMContentLoaded', () => {
     injectNavbar();
@@ -48,11 +49,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function loadSettings() {
-        chrome.storage.sync.get(['addedWebsites'], (items) => {
-            if (items.addedWebsites) {
-                addedWebsites = items.addedWebsites;
-            }
-
+        loadSettingsFromStorage().then((settings) => {
+            addedWebsites = settings;
             isLoaded = true;
             renderSidebar();
 
@@ -69,6 +67,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     selectSite(addedWebsites[0].url);
                 }
             }
+        }).catch(err => {
+            console.error('Error loading settings:', err);
         });
     }
 
@@ -404,20 +404,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    //TODO: implement settings export/import into a json file
-
     function saveSettings() {
-        chrome.storage.sync.set({
-            addedWebsites: addedWebsites
-        }, () => {
-            if (chrome.runtime.lastError) {
-                console.error('Error saving settings:', chrome.runtime.lastError);
-                status.textContent = 'Error saving!';
-                status.className = 'status badge bg-danger text-white me-2';
-            } else {
-                status.textContent = 'Settings saved!';
-                status.className = 'status badge bg-info text-dark me-2';
-            }
+        saveSettingsToStorage(addedWebsites).then(() => {
+            status.textContent = 'Settings saved!';
+            status.className = 'status badge bg-info text-dark me-2';
+            setTimeout(() => {
+                if (status) status.textContent = '';
+            }, 2000);
+        }).catch((err) => {
+            console.error('Error saving settings:', err);
+            status.textContent = 'Error saving!';
+            status.className = 'status badge bg-danger text-white me-2';
             setTimeout(() => {
                 if (status) status.textContent = '';
             }, 2000);
