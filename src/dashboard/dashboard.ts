@@ -190,7 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             ${SITE_ACTIONS.map(opt => `<option value="${opt.value}" ${action.action.value === opt.value ? 'selected' : ''}>${opt.text}</option>`).join('')}
                         </select>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-6 ${action.alwaysActive ? 'd-none' : ''}">
                         <div class="row g-2">
                             <div class="col-6">
                                 <div class="input-group input-group-sm">
@@ -206,6 +206,15 @@ document.addEventListener('DOMContentLoaded', () => {
                             </div>
                         </div>
                     </div>
+                    <div class="col-md-3">
+                        <div class="form-check pt-1">
+                            <input class="form-check-input always-active-check" type="checkbox" id="always-${index}" ${action.alwaysActive ? 'checked' : ''}>
+                            <label class="form-check-label small" for="always-${index}">Always active</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="days-container mb-2 ${action.alwaysActive ? 'd-none' : ''}">
+                    ${daysHtml}
                 </div>
                 ${grayscaleOptionsHtml}
                 ${selectorsToRemoveHtml}
@@ -229,14 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     `).join('')}
                     <button class="btn btn-dark btn-sm add-path-btn">+ Add Path</button>
                 </div>
-                <div class="days-container">
-                    ${daysHtml}
-                </div>
-                <div class="d-flex justify-content-between align-items-center">
-                    <div class="form-check pt-1">
-                        <input class="form-check-input always-active-check" type="checkbox" id="always-${index}" ${action.alwaysActive ? 'checked' : ''}>
-                        <label class="form-check-label small" for="always-${index}">Always active</label>
-                    </div>
+                <div class="d-flex justify-content-end align-items-center">
                     <button class="btn btn-danger btn-sm remove-action-btn">Delete action</button>
                 </div>
             `;
