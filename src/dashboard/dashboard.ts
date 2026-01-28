@@ -308,8 +308,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const removePathBtns = actionRow.querySelectorAll('.remove-path-btn') as NodeListOf<HTMLButtonElement>;
             removePathBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
+                    const pIndex = parseInt(btn.dataset.index!);
+                    if (action.paths[pIndex].length === 0) {
+                        action.paths.splice(pIndex, 1);
+                        renderActions();
+                        saveSettings();
+                        return;
+                    }
                     showConfirmModal('Are you sure you want to delete this path?', () => {
-                        const pIndex = parseInt(btn.dataset.index!);
                         action.paths.splice(pIndex, 1);
                         renderActions();
                         saveSettings();
