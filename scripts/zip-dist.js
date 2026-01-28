@@ -7,9 +7,16 @@ const outputFileName = `${packageJson.name}-${packageJson.version}.zip`;
 const outputPath = path.join(__dirname, '..', outputFileName);
 const sourceDir = path.join(__dirname, '..', 'dist');
 
-if (fs.existsSync(outputPath)) {
-    console.log(`Deleting existing ${outputFileName}...`);
-    fs.unlinkSync(outputPath);
+const zipPattern = new RegExp(`^${packageJson.name}-.*\\.zip$`);
+const parentDir = path.join(__dirname, '..');
+const existingZips = fs.readdirSync(parentDir).filter(file => zipPattern.test(file));
+
+if (existingZips.length > 0) {
+    existingZips.forEach(zipFile => {
+        const zipPath = path.join(parentDir, zipFile);
+        console.log(`Deleting existing ${zipFile}...`);
+        fs.unlinkSync(zipPath);
+    });
 }
 
 const output = fs.createWriteStream(outputPath);
