@@ -7,7 +7,7 @@ const outputFileName = `${packageJson.name}-${packageJson.version}.zip`;
 const outputPath = path.join(__dirname, '..', outputFileName);
 const sourceDir = path.join(__dirname, '..', 'dist');
 
-const zipPattern = new RegExp(`^${packageJson.name}-.*\\.zip$`);
+const zipPattern = /\.zip$/;
 const parentDir = path.join(__dirname, '..');
 const existingZips = fs.readdirSync(parentDir).filter(file => zipPattern.test(file));
 
