@@ -5,8 +5,7 @@
   "description": "A highly configurable Chrome extension to help manage time on addictive sites.",
   "permissions": [
     "storage",
-    "tabs",
-    "scripting"
+    "tabs"
   ],
   "background": {
     "service_worker": "background.js"
