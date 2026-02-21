@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Common configuration - Dopamine Rehab</title>
+</head>
+<body class="bg-body-tertiary">
+    <div id="wrapper">
+        <div id="page-content-wrapper" class="flex-grow-1">
+            <div class="container p-5">
+                <h2 class="mb-4">Common configuration</h2>
+                <p class="text-muted mb-5">Quickly install pre-configured settings for popular websites.</p>
+
+                <!--TODO: this is a hardcoded test, generalize all config-->
+                <div class="section mb-5">
+                    <h3 class="mb-4 border-bottom pb-2">YouTube</h3>
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                        <div class="col">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body">
+                                    <h5 class="card-title">Clean & Focus</h5>
+                                    <p class="card-text text-muted small">Remove comments and recommendations to focus on the video content.</p>
+                                    <button id="install-youtube-clean" class="btn btn-outline-primary btn-sm mt-2">Install</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Info Modal -->
+    <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="infoModalLabel">Dopamine Rehab</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="infoModalBody">
+                    ...
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../common-config.js"></script>
+</body>
+</html>

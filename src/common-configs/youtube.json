@@ -1,0 +1,25 @@
+[
+  {
+    "url": "youtube.com",
+    "favicon": "https://www.google.com/s2/favicons?domain=youtube.com&sz=32",
+    "actions": [
+      {
+        "action": {
+          "value": "removeHtmlSelectors",
+          "options": {
+            "htmlSelectorsToRemove": [
+              ".ytd-comments",
+              "#secondary"
+            ]
+          }
+        },
+        "startTime": "00:00",
+        "endTime": "23:59",
+        "days": [0, 1, 2, 3, 4, 5, 6],
+        "alwaysActive": true,
+        "paths": [],
+        "pathMatch": "include"
+      }
+    ]
+  }
+]

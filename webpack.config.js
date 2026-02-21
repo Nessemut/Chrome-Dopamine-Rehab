@@ -7,6 +7,7 @@ module.exports = {
     background: './background.ts',
     dashboard: './src/dashboard/dashboard.ts',
     about: './src/about/about.ts',
+    'common-config': './src/common-config/common-config.ts',
     applySettings: './applySettings.ts',
   },
   output: {
@@ -36,6 +37,8 @@ module.exports = {
         { from: 'manifest.json', to: '.' },
         { from: 'src/dashboard/dashboard.html', to: 'src' },
         { from: 'src/about/about.html', to: 'src' },
+        { from: 'src/common-config/common-config.html', to: 'src' },
+        { from: 'src/common-configs', to: 'src/common-configs' },
         { from: 'icons', to: 'icons' },
       ],
     }),

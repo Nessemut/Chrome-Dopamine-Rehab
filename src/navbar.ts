@@ -8,6 +8,7 @@ export function injectNavbar() {
             </div>
             <div class="ms-auto d-flex align-items-center">
                 <a href="dashboard.html" class="nav-link me-3 ${window.location.pathname.endsWith('dashboard.html') ? 'active' : ''}">Dashboard</a>
+                <a href="common-config.html" class="nav-link me-3 ${window.location.pathname.endsWith('common-config.html') ? 'active' : ''}">Common configuration</a>
                 <a href="about.html" class="nav-link ${window.location.pathname.endsWith('about.html') ? 'active' : ''}">About</a>
             </div>
         </div>
